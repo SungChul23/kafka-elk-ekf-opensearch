@@ -1,7 +1,7 @@
 # Firehose가 OpenSearch 전송에 실패한 문서를 보관하는 백업 버킷
 resource "aws_s3_bucket" "firehose_backup" {
   bucket        = local.backup_bucket_name
-  force_destroy = true
+  force_destroy = false
 }
 
 resource "aws_s3_bucket_public_access_block" "firehose_backup" {
