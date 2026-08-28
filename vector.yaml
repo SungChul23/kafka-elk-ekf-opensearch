@@ -1,0 +1,35 @@
+# 1. source (input-local kafka)
+sources:
+  kafka_to_firehose_source:
+    type: "kafka"
+    bootstrap_servers: "kafka:9092"
+    group_id: "vector-firehose-consumer"
+    topics:
+      - "factory-json-topic"
+      - "factory-text-topic"
+    decoding:
+      codec: "json"
+    librdkafka_options:
+      "auto.offset.reset": "earliest"
+
+# 2. transform (처리시간 삽입)
+transforms:
+  add_ingest_time:
+    type: "remap"
+    inputs:
+      - "kafka_to_firehose_source"
+    source: |
+      .vector_ingest_at = now()
+
+# 3. sink (output-aws firehose)
+# sinks:
+#   firehose_sink:
+
+# 4. sink (output-debug)
+sinks:
+  debug_console:
+    type: "console"
+    inputs:
+      - "add_ingest_time"
+    encoding:
+      codec: "json"
