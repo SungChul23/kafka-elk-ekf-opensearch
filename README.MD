@@ -74,6 +74,57 @@ Python 로그 생성기 ┤
                                   ▼
                            AWS Firehose -> 버퍼링 -> s3(브론즈 혹은 오픈서치 전송 실패한 데이터만 collect) or opensearch(인덱스 (센서/공장관리단위) 검색) -> Airflow DAG 활용 -> 메달리온 아킥텍처 적용
 ```
+# 디렉토리 구조
+
+```
+E:.
+│  .env
+│  .gitignore
+│  docker-compose.yml
+│  fluent-bit.conf
+│  log_gen.py
+│  README.MD
+│  vector.yaml
+│  
+├─fluent-bit-state
+│      sensor-json.db
+│      sensor-json.db-shm
+│      sensor-json.db-wal
+│      sensor-text.db
+│      sensor-text.db-shm
+│      sensor-text.db-wal
+│      
+├─infra
+│  │  .terraform.lock.hcl
+│  │  cloudwatch.tf
+│  │  firehose.tf
+│  │  iam-firehose.tf
+│  │  iam-vector.tf
+│  │  locals.tf
+│  │  opensearch.tf
+│  │  outputs.tf
+│  │  provider.tf
+│  │  s3.tf
+│  │  variables.tf
+│  │  version.tf
+│  │  
+│  └─.terraform
+│      └─providers
+│          └─registry.terraform.io
+│              └─hashicorp
+│                  └─aws
+│                      └─6.62.0
+│                          └─windows_amd64
+│                                  LICENSE.txt
+│                                  terraform-provider-aws_v6.62.0_x5.exe
+│                                  
+├─logstash.conf
+└─sensor_logs
+        sensor_json.log
+        sensor_text.log
+
+```
+
 
 # 개발 환경 구성
 - docker-compose.yaml 구성
