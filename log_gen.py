@@ -23,6 +23,7 @@ BACKUP_COUNT = 5
 os.makedirs(LOG_DIR, exist_ok=True)
 
 # 로그 파일별 기록, 로테이션 관리 .. 객체 구성
+# 50 MB 내에서 5개 파일로 로그 관리 구성
 def create_rotation_logger(name:str,filename:str) -> logging.Logger:
     logger = logging.getLogger(name)    # 고유한 문자열로 구분되는 로거 객체 획득
     logger.setLevel(logging.INFO)       # 정보 레벨 로그만 수집
@@ -58,6 +59,9 @@ def generator_logs():
         "humidity"          : round(random.uniform(30.0,80.0), 1),
         "status"            : "RUNNING"
     }
+    
+    # A 채널 : json 버전 -> 직렬화 -> str -> 로그 기록
+    json_logger.info(json.dumps(data,ensure_ascii=False))
     pass
 
 # 메인 함수
