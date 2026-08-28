@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "project_name" {
   description = "프로젝트명"
   type        = string
-  default     = "de-ai-22-kakfa-efk"
+  default     = "de-ai-22-kafka-efk"
 }
 # opensearch 서비스(<-엘라스틱서치)/ opensearch 대시보드(<-키바나) 접속 가능한 IP 입력
 variable "allowed_cidr" {
