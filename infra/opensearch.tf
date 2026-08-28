@@ -60,6 +60,10 @@ resource "aws_opensearch_domain" "factory" {
 
   access_policies = data.aws_iam_policy_document.opensearch_access.json
 
+  # 들어오는 데이터의 타입에 대한 매핑 정보제공 (스키마 힌트)
+  # 데이터 구조가 변경되면 -> 교체
+  # 이런 정보가 없으면 opensearch가 데이터를 보고 -> 타입추정 -> 타입 매칭
+  # 주로 timestamp 에서 오류 발생이 많음
   provisioner "local-exec" {
     command = <<-EOT
       curl -X PUT "https://${self.endpoint}/factory-sensor" \
