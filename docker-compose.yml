@@ -1,0 +1,86 @@
+services:
+  # 1. Kafka Broker (Apache 공식 이미지 사용)
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: kafka-local
+    ports:
+      - "9092:9092"
+    environment:
+      # KRaft 모드 설정
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
+      KAFKA_LISTENERS: 'PLAINTEXT://:9092,CONTROLLER://:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    networks:
+      - kafka-net
+
+  # 2. Fluent Bit -> C
+  fluent-bit:
+    image: fluent/fluent-bit:latest
+    container_name: fluent-bit
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./sensor_logs:/opt/airflow/sensor_logs
+      - ./fluent-bit-state:/fluent-bit/state
+    depends_on:
+      - kafka
+    networks:
+      - kafka-net
+
+  # 3. Logstash -> Java
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.12.0
+    container_name: logstash
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    environment:
+      LS_JAVA_OPTS: "-Xms512m -Xmx512m"
+    depends_on:
+      - kafka
+    networks:
+      - kafka-net
+
+
+  # 4. Vector (Kafka -> Firehose 브릿지 역할)
+  vector:
+    image: timberio/vector:0.36.0-debian # 최신 안정 버전
+    container_name: vector
+    volumes:
+      - ./vector.yaml:/etc/vector/vector.yaml:ro
+    environment:
+      # .env 또는 현재 Shell의 AWS 인증 정보를 Vector에 전달
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
+      AWS_SESSION_TOKEN: "${AWS_SESSION_TOKEN:-}"
+      AWS_REGION: "${AWS_REGION:-ap-northeast-2}"
+      FIREHOSE_STREAM_NAME: "${FIREHOSE_STREAM_NAME:-de-ai-30-ap2-kafka}"
+    depends_on:
+      - kafka
+    networks:
+      - kafka-net
+
+  # 5. Kafka UI (kafka-connect 의존성 제거)
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8081:8080"
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    networks:
+      - kafka-net
+      
+networks:
+  kafka-net:
+    driver: bridge
