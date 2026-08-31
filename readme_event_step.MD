@@ -149,21 +149,61 @@ Step Functions
         S3 Silver / Gold
 ```
 
-# 인프라 구성
+# 인프라 구성 1 (브론즈 저장까지 수정)
 - 0. opensearch 제거
-     - opensearch.tf 삭제
-     - variables.tf에서 opensearch 관련 변수 삭제
-     - firehose.tf에서 opensearch 구성삭제
+       - opensearch.tf 삭제
+       - variables.tf에서 opensearch 관련 변수 삭제
+       - firehose.tf에서 opensearch 구성삭제
+       - outputs.tf에서 opensearch 출력 삭제
 
 - 1. 변수명 조정 => 금요일 인프라 구분
+       - 프로젝트명, firehose 크기/시간 
 
 - 2. firehose에서 s3로 적제되게 조정 -> Data Lake 구성완료
+
+- 3. 인프라 구성
+```
+       terraform -chdir=infra fmt
+       terraform -chdir=infra validate
+       terraform -chdir=infra plan
+       terraform -chdir=infra apply
+```
+- 4. .env에 FIREHOSE_STREAM_NAME 수정
+```
+       # 이름 조회
+       terraform -chdir=infra output
+
+       # .env 수정
+       FIREHOSE_STREAM_NAME=de-ai-25-eb-step-pipeline-firehose
+
+       # 도커 컴포즈 재구성 => vector 컨테이너의 환경변수로 설정되게 수정
+       docker compose down
+       docker compose up -d
+```
+- 5. 로그 발생 -> ... -> s3://버킷/bronze/*.gzip 확인
+```
+       python log_gen.py
+```
+
+# 인프라 구성 2
 ```
 eventbridge.tf
 stepfunctions.tf
 glue.tf
 catalog.tf
 athena.tf
-iam-xxx.tf
+lambda.tf
+iam-stepfunctions.tf
+iam-glue.tf
+iam-lambda.tf
+sns.tf
 ...
 ```
+
+# 파이썬 파일
+- etl glue job
+       - ~/glue/bronze_to_silver.py
+- lambda
+       - ~/lambda/check_bronze.py
+       - ~/lambda/cleanup_gold.py
+       - ~/lambda/quality_check.py
