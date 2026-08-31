@@ -21,39 +21,24 @@ resource "aws_iam_role_policy" "firehose" {
   name = "${var.project_name}-firehose-policy"
   role = aws_iam_role.firehose.id
 
+  # s3에 조회, 객체 저장등 권한 조정, 오픈서치 제거
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "S3Backup"
+        Sid    = "S3Upload"
         Effect = "Allow"
         Action = [
           "s3:AbortMultipartUpload",
+          "s3:PutObject",
           "s3:GetBucketLocation",
           "s3:GetObject",
           "s3:ListBucket",
-          "s3:ListBucketMultipartUploads",
-          "s3:PutObject"
+          "s3:ListBucketMultipartUploads"
         ]
         Resource = [
-          aws_s3_bucket.firehose_backup.arn,
-          "${aws_s3_bucket.firehose_backup.arn}/*"
-        ]
-      },
-      {
-        Sid    = "OpenSearchDelivery"
-        Effect = "Allow"
-        Action = [
-          "es:DescribeElasticsearchDomain",
-          "es:DescribeElasticsearchDomains",
-          "es:DescribeElasticsearchDomainConfig",
-          "es:ESHttpGet",
-          "es:ESHttpPost",
-          "es:ESHttpPut"
-        ]
-        Resource = [
-          local.opensearch_domain_arn,
-          "${local.opensearch_domain_arn}/*"
+          aws_s3_bucket.data_lake.arn,
+          "${aws_s3_bucket.data_lake.arn}/*"
         ]
       },
       {

@@ -13,7 +13,8 @@ resource "aws_iam_policy" "vector_firehose_put" {
           "firehose:PutRecordBatch",
           "firehose:DescribeDeliveryStream"
         ]
-        Resource = aws_kinesis_firehose_delivery_stream.opensearch.arn
+        # 이름 수정
+        Resource = aws_kinesis_firehose_delivery_stream.bronze.arn
       }
     ]
   })
