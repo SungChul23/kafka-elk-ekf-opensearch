@@ -5,31 +5,21 @@ variable "aws_region" {
 }
 
 variable "project_name" {
-  description = "프로젝트명"
+  description = "프로젝트명 / Eventbrdige + Stepfunction"
   type        = string
-  default     = "de-ai-22-kafka-efk"
-}
-# opensearch 서비스(<-엘라스틱서치)/ opensearch 대시보드(<-키바나) 접속 가능한 IP 입력
-variable "allowed_cidr" {
-  description = "opensearch 대시보드/API에 접속한 공인 IP x.x.x.x/32"
-  type        = string
-
-  validation {
-    condition     = can(cidrhost(var.allowed_cidr, 0))
-    error_message = "가능한 주소는 CIDR 형식이여야 합니다."
-  }
+  default     = "de-ai-22-eb-step-pipeline"
 }
 
 # firehose 이름, firhose->opensearch : iam role name
 variable "firehose_buffer_size" {
-  description = "오픈 서치로 전송할때 최대 버퍼 사이즈(MB)"
+  description = "최대 버퍼 사이즈(MB)"
   type        = number
-  default     = 1
+  default     = 64
 }
 variable "firehose_buffer_interval" {
-  description = "오픈 서치로 전송할때 최대 버퍼 시간(s)"
+  description = "최대 버퍼 시간(s)"
   type        = number
-  default     = 60
+  default     = 300
 }
 
 # vector -> firhose : iam role name
