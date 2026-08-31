@@ -20,30 +20,6 @@ variable "allowed_cidr" {
   }
 }
 
-variable "opensearch_engine_version" {
-  description = "OpenSearch 엔진 버전"
-  type        = string
-  default     = "OpenSearch_3.5"
-}
-
-variable "opensearch_instance_type" {
-  description = "학습용 OpenSearch 데이터 노드 인스턴스"
-  type        = string
-  default     = "t3.small.search"
-}
-
-variable "opensearch_ebs_volume_size" {
-  description = "OpenSearch EBS 볼륨 크기(GB)"
-  type        = number
-  default     = 10
-}
-# opensearch, spec(버전, 인스턴유형, 볼륨단위, 인덱스등 설정)
-variable "opensearch_index_name" {
-  description = "firehose가 데이터를 opensearch에 적재할때 세팅하는 인덱스값"
-  type        = string
-  default     = "factory-sensor-001"
-}
-
 # firehose 이름, firhose->opensearch : iam role name
 variable "firehose_buffer_size" {
   description = "오픈 서치로 전송할때 최대 버퍼 사이즈(MB)"
