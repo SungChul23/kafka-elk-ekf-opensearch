@@ -78,7 +78,7 @@ def main() -> None:
     try:
         while True:
             generator_logs()
-            time.sleep(2)
+            time.sleep(1)
 
     except Exception as e:
         print("종료처리", e)
